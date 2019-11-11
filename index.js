@@ -23,7 +23,8 @@ app.listen(app.get("port"), () => {
 });
 
 const token = tokensMiddleware.generateToken({
-    _id: "q1w2e3r4t5",
-    nombre: "Marco Serrano"
+    _id: "a1b2c3d4",
+    nombre: "Master"
 });
-console.log(token);
+console.log(`[TOKEN GENERADO]: Escriba el siguiente token en la cabecera(Headers) de Postman con el nombre de:
+[x-access-token] para iniciar sesion: ----->` + token);
