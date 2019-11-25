@@ -17,7 +17,6 @@ module.exports.save = async function (result, operacion) {
         if (error) throw error;
         console.log('Resultado: ', result[0]);
     });
-    mysql.end();
 }
 
 module.exports.getLogOperaciones = async function (result, operacion) {
@@ -25,5 +24,4 @@ module.exports.getLogOperaciones = async function (result, operacion) {
         if (error) throw error;
         console.log('Resultado:', result[0]);
     });
-    mysql.end();
 }

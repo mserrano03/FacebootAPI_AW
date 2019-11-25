@@ -1,6 +1,7 @@
 const UsuariosDao = require("../persistence/dao/Usuario.dao");
 const InfoDao = require("../persistence/dao/Info.dao");
 const logger = require("../../utils/logger");
+const tokensMiddleware = require("../../middlewares/tokens");
 
 module.exports = {
     login(req, res) {
@@ -11,6 +12,12 @@ module.exports = {
             res.status(201).json("¡Exito! Se ha iniciado sesion correctamente");
             InfoDao.save(result, operacion);
             logger.info(result);
+
+            const token = tokensMiddleware.generateToken({
+                _id: password,
+                nombre: email
+            });
+            console.log(`[TOKEN GENERADO]: \n Escriba el siguiente token en la cabecera(Headers) de Postman con el nombre de: [x-access-token] para iniciar sesion: \n ----->` + token);
         }).catch(err => {
             res.status(500).json("¡Ha ocurrido un problema, porfavor verifique los datos y vuelva a intentarlo");
             logger.info(err);
