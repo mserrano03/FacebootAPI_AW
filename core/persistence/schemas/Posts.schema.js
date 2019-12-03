@@ -4,9 +4,9 @@ const ObjectId = mongoose.Types.ObjectId;
 
 const postSchema = new Schema({
     _idAutor: { type: ObjectId, ref: "Usuario" },
-    tipoPost: { type: String, required: false, maxlength: 50 },
+    publico: { type: Boolean, default: false, required: false, maxlength: 50 },
     texto: { type: String, required: false, maxlength: 500 },
-    tags: { type: String, required: false, maxlength: 100 },
+    tags: [{ type: String, required: true}],
     uriImage: { type: String, required: false },
     comentarios: {
         type: [{

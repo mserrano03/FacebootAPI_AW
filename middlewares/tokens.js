@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const secretPhrase = "facebootAPI123";
 
 exports.generateToken = (user) => {
-    return jwt.sign(user, secretPhrase, { expiresIn: "5m" });
+    return jwt.sign(user, secretPhrase);
 }
 
 exports.validateToken = async (token) => {

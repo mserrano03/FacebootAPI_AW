@@ -1,83 +1,106 @@
 const UsuariosModel = require("../schemas/Usuario.schema");
+const tokensMiddleware = require("../../../middlewares/tokens");
 
-module.exports.loginUser = async function (email, password) {
-    let datos = {
-        "email": email,
-        "password": password
-    };
-
-    let usuarioExiste = await UsuariosModel.findOne(datos);
-
-    if (usuarioExiste == null || usuarioExiste == undefined) {
+module.exports.loginUser = async function (usuario) {
+    try {
+        let usuarioExiste = await UsuariosModel.findOne(usuario);
+        if (usuarioExiste == null || usuarioExiste == undefined) {
+            return 0;
+        } else {
+            let token = tokensMiddleware.generateToken({
+                _id: usuarioExiste._id,
+                nombre: usuarioExiste.email
+            });
+            usrResult = {
+                id: usuarioExiste._id,
+                token: token
+            }
+            return usrResult;
+        }
+    } catch (error) {
         return 0;
-    } else {
-        return usuarioExiste;
     }
 }
 
 module.exports.save = async function (usuario) {
-    const newUsuarioSchema = new UsuariosModel(usuario);
-    let amigoExiste = usuario.amigos;
-    let contador = 0;
+    let edad = 0;
+    let date = new Date();
+    let actualyear = date.getFullYear();
+    let actualmonth = date.getMonth();
+    let actualday = date.getDate();
 
-    if (amigoExiste.length == 0) {
+    if (usuario.month > actualmonth) {
+        edad = actualyear - usuario.year - 1;
+    } else if (usuario.month == actualmonth) {
+        if (usuario.day >= actualday) {
+            edad = actualyear - usuario.year;
+        } else {
+            edad = actualyear - usuario.year - 1;
+        }
+    } else {
+        edad = actualyear - usuario.year;
+    }
+
+    let signupusr = {
+        nombre: `${usuario.nombres} ${usuario.apellidos}`,
+        email: usuario.email,
+        password: usuario.password,
+        edad: edad,
+        sexo: usuario.sexo,
+        fecha_nacimiento: `${usuario.day}/${usuario.month + 1}/${
+            usuario.year
+            }`,
+        gen_musicales: usuario.musica,
+        gen_peliculas: usuario.peliculas,
+        amigos: []
+    };
+    try {
+        const newUsuarioSchema = new UsuariosModel(signupusr);
         const result = await newUsuarioSchema.save();
         return result;
-    } else {
-        for (let index = 0; index < amigoExiste.length; index++) {
-            let usuaComp = amigoExiste[index].amigo;
-            let amigoReal = await UsuariosModel.findById(usuaComp);
-            if (amigoReal != undefined || amigoReal != null) {
-                if ((index + 1) < amigoExiste.length) {
-                    let segUsuaComp = amigoExiste[index + 1].amigo;
-                    if (usuaComp == segUsuaComp) {
-                        console.log("¡Error! Hay registros clonados en la peticion");
-                        break
-                    } else {
-                        contador++;
-                    }
-                } else {
-                    contador++;
-                }
-            } else {
-                console.log("¡Error! ¡Ha ingresado un amigo inexistente!");
-                break
-            }
-
-            if (contador == amigoExiste.length) {
-                const result = await newUsuarioSchema.save();
-                console.log(result);
-                return result;
-            } else {
-                console.log("¡Ha ocurrido un error al guardar el Usuario!");
-            }
-        }
+    } catch (error) {
+        return error;
     }
+
 }
 
-module.exports.getUsuarios = async function (sesion) {
-    const email = sesion.email;
-    const password = sesion.password;
-    const loginExitoso = await this.loginUser(email, password);
-    if (loginExitoso != 0) {
+module.exports.getUsuarios = async function () {
+    try {
         const result = await UsuariosModel.find();
         return result;
-    } else {
-        console.log("¡Atencion! Se requiere inicio de sesion correcto para esta operacion");
+    } catch (error) {
+        return error;
     }
+
+    // const email = sesion.email;
+    // const password = sesion.password;
+    // const loginExitoso = await this.loginUser(email, password);
+    // if (loginExitoso != 0) {
+    //     const result = await UsuariosModel.find();
+    //     return result;
+    // } else {
+    //     console.log("¡Atencion! Se requiere inicio de sesion correcto para esta operacion");
+    // }
 }
 
-module.exports.getUsuariosById = async function (sesion, idUsuario) {
-    const email = sesion.email;
-    const password = sesion.password;
-    const loginExitoso = await this.loginUser(email, password);
-
-    if (loginExitoso != 0) {
+module.exports.getUsuariosById = async function (idUsuario) {
+    try {
         const result = await UsuariosModel.findById(idUsuario);
         return result;
-    } else {
-        console.log("¡Atencion! Se requiere inicio de sesion correcto para esta operacion");
+    } catch (error) {
+        return error;
     }
+
+
+    // const email = sesion.email;
+    // const password = sesion.password;
+    // const loginExitoso = await this.loginUser(email, password);
+
+    // if (loginExitoso != 0) {
+
+    // } else {
+    //     console.log("¡Atencion! Se requiere inicio de sesion correcto para esta operacion");
+    // } 
 }
 
 module.exports.updateUsuario = async function (sesion, idUsuario, usuario) {
