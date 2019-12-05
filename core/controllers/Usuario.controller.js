@@ -3,7 +3,7 @@ const InfoDao = require("../persistence/dao/Info.dao");
 const logger = require("../../utils/logger");
 const tokensMiddleware = require("../../middlewares/tokens");
 
-module.exports = { 
+module.exports = {
     login(req, res) {
         const usuario = req.body;
         const operacion = "Login";
@@ -72,13 +72,11 @@ module.exports = {
     },
     putUsuario(req, res) {
         let usuario = req.body;
-        let idUsuario = req.params.idUsuario;
-        const sesion = req.headers;
         const operacion = "Editar usuario";
 
         try {
-            UsuariosDao.updateUsuario(sesion, idUsuario, usuario).then((result) => {
-                res.status(200).json("¡Exito! Se ha editado el usuario satisfactoriamente");
+            UsuariosDao.updateUsuario(usuario).then((result) => {
+                res.status(200).json(result);
                 InfoDao.save(result, operacion);
                 logger.info(result);
             }).catch((error) => {
@@ -109,5 +107,29 @@ module.exports = {
             res.status(500).json("¡Ha ocurrido un problema, porfavor verifique los datos y vuelva a intentarlo");
             logger.info(error);
         }
+    },
+    saveFriend(req, response) {
+        const friend = req.body;
+        const operacion = "Guardar comentario";
+
+        UsuariosDao.saveFriend(friend).then((result) => {
+            response.status(201).json(result);
+            InfoDao.save(result, operacion);
+            logger.info(result);
+        }).catch(err => {
+            response.status(500).json("¡Ha ocurrido un problema, porfavor verifique los datos y vuelva a intentarlo");
+            logger.info(err);
+        });
+    },
+    getNoAgregados(req, response) {
+        const usr = req.params.idUsuario;
+        UsuariosDao.getNoAgregados(usr).then((result) => {
+            response.status(201).json(result);
+            InfoDao.save(result, operacion);
+            logger.info(result);
+        }).catch(err => {
+            response.status(500).json("¡Ha ocurrido un problema, porfavor verifique los datos y vuelva a intentarlo");
+            logger.info(err);
+        });
     }
 }

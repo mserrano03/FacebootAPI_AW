@@ -34,6 +34,7 @@ module.exports = {
         try {
             PostsDao.getPostById(idPost).then((result) => {
                 res.status(200).json(result);
+                next();
                 InfoDao.save(result, operacion);
                 logger.info(result);
             }).catch((error) => {
@@ -58,25 +59,6 @@ module.exports = {
                     InfoDao.save(result, operacion);
                     logger.info(result);
                 }
-            }).catch((error) => {
-                res.status(500).json("¡Ha ocurrido un problema, porfavor verifique los datos y vuelva a intentarlo");
-                logger.info(error);
-            });
-        } catch (error) {
-            res.status(500).json("¡Ha ocurrido un problema, porfavor verifique los datos y vuelva a intentarlo");
-            logger.info(error);
-        }
-    },
-    getPostsByIdAndUsr(req, res) {
-        let idPost = req.params.idPost;
-        const sesion = req.headers;
-        const operacion = "Buscar publicaciones por ID";
-
-        try {
-            PostsDao.getPostById(sesion, idPost).then((result) => {
-                res.status(200).json(result);
-                InfoDao.save(result, operacion);
-                logger.info(result);
             }).catch((error) => {
                 res.status(500).json("¡Ha ocurrido un problema, porfavor verifique los datos y vuelva a intentarlo");
                 logger.info(error);

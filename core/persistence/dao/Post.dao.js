@@ -187,20 +187,6 @@ module.exports.getPostsUsr = async function (usrid) {
 
 }
 
-module.exports.getPostByIdAndUsr = async function (sesion, idPost) {
-    const email = sesion.email;
-    const password = sesion.password;
-    let logginExitoso = await login.loginUser(email, password);
-    const result = await PostsModel.findById(idPost);
-    if (logginExitoso != 0) {
-        return result;
-    } else if ((logginExitoso == 0) && result.tipoPost == "Publico") {
-        return result;
-    } else {
-        console.log("El post buscado es privado, necesitas Iniciar sesion para poder verlo");
-    }
-}
-
 module.exports.updatePost = async function (sesion, idPost, post) {
     const email = sesion.email;
     const password = sesion.password;
