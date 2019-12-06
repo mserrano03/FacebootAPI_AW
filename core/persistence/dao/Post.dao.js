@@ -19,6 +19,7 @@ module.exports.save = async function (post) {
                 id: result._id,
                 idAutor: result._idAutor,
                 autor: autor.nombre,
+                autorimg:autor.uriImage,
                 texto: result.texto,
                 tags: result.tags,
                 uriImage: result.uriImage,
@@ -56,6 +57,7 @@ module.exports.getPosts = async function (usrid) {
                             id: c._id,
                             idAutor: c._idAutorCom,
                             nombreAutor: autorCom.nombre,
+                            autorimg:autorCom.uriImage,
                             mensaje: c.mensaje
                         }
                         comentarios.push(comentario);
@@ -72,7 +74,8 @@ module.exports.getPosts = async function (usrid) {
                     comentarios: comentarios,
                     fecha: fecha,
                     hora: hora,
-                    publico: p.publico
+                    publico: p.publico,
+                    autorimg:autor.uriImage
                 }
                 posts.push(post);
             }
@@ -100,6 +103,7 @@ module.exports.getPostById = async function (idPost) {
                         id: c._id,
                         idAutor: c._idAutorCom,
                         nombreAutor: autorCom.nombre,
+                        autorimg:autorCom.uriImage,
                         mensaje: c.mensaje
                     }
                     comentarios.push(comentario);
@@ -116,6 +120,7 @@ module.exports.getPostById = async function (idPost) {
                 publico: result.publico,
                 fecha: fecha,
                 hora: hora,
+                autorimg:autor.uriImage,
                 comentarios:comentarios
             }
             return post;
@@ -146,7 +151,8 @@ module.exports.getPostsUsr = async function (usrid) {
                             id: c._id,
                             idAutor: c._idAutorCom,
                             nombreAutor: autorCom.nombre,
-                            mensaje: c.mensaje
+                            mensaje: c.mensaje,
+                            autorimg:autorCom.uriImage
                         }
                         comentarios.push(comentario);
                     }
@@ -162,7 +168,8 @@ module.exports.getPostsUsr = async function (usrid) {
                     comentarios: comentarios,
                     fecha: fecha,
                     hora: hora,
-                    publico: p.publico
+                    publico: p.publico,
+                    autorimg:autor.uriImage
                 }
                 posts.push(post);
             }

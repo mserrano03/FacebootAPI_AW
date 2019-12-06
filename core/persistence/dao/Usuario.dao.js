@@ -83,7 +83,8 @@ module.exports.getUsuariosById = async function (idUsuario) {
                 let amigui = {
                     _id: a._id,
                     amigo: a.amigo,
-                    nombre: amigo.nombre
+                    nombre: amigo.nombre,
+                    uriImage:amigo.uriImage
                 };
                 amigos.push(amigui);
             }
@@ -97,7 +98,8 @@ module.exports.getUsuariosById = async function (idUsuario) {
                 edad: result.edad,
                 sexo: result.sexo,
                 fecha_nacimiento: result.fecha_nacimiento,
-                amigos: amigos
+                amigos: amigos,
+                uriImage:result.uriImage
             }
             return usr;
         }
@@ -116,7 +118,8 @@ module.exports.updateUsuario = async function (usuario) {
         fecha_nacimiento: usuario.fecha_nacimiento,
         gen_musicales: usuario.gen_musicales,
         gen_peliculas: usuario.gen_peliculas,
-        amigos: usuario.amigos
+        amigos: usuario.amigos,
+        uriImage:usuario.uriImage
     };
     try {
         let result = await UsuariosModel.findByIdAndUpdate(usuario._id, signupusr);
@@ -183,6 +186,13 @@ module.exports.getNoAgregados = async function (usrid) {
                             noagregados.push(a);
                         }
                     }
+                }
+            }
+            return noagregados;
+        } else {
+            for (let a of usuarios) {
+                if (a._id != usrid) {
+                    noagregados.push(a);
                 }
             }
             return noagregados;
