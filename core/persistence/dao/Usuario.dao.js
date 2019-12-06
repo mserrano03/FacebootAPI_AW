@@ -71,16 +71,6 @@ module.exports.getUsuarios = async function () {
     } catch (error) {
         return error;
     }
-
-    // const email = sesion.email;
-    // const password = sesion.password;
-    // const loginExitoso = await this.loginUser(email, password);
-    // if (loginExitoso != 0) {
-    //     const result = await UsuariosModel.find();
-    //     return result;
-    // } else {
-    //     console.log("¡Atencion! Se requiere inicio de sesion correcto para esta operacion");
-    // }
 }
 
 module.exports.getUsuariosById = async function (idUsuario) {
@@ -114,17 +104,6 @@ module.exports.getUsuariosById = async function (idUsuario) {
     } catch (error) {
         return error;
     }
-
-
-    // const email = sesion.email;
-    // const password = sesion.password;
-    // const loginExitoso = await this.loginUser(email, password);
-
-    // if (loginExitoso != 0) {
-
-    // } else {
-    //     console.log("¡Atencion! Se requiere inicio de sesion correcto para esta operacion");
-    // } 
 }
 
 module.exports.updateUsuario = async function (usuario) {
@@ -145,25 +124,6 @@ module.exports.updateUsuario = async function (usuario) {
     } catch (error) {
         return error;
     }
-
-    // const email = sesion.email;
-    // const password = sesion.password;
-    // const loginExitoso = await this.loginUser(email, password);
-
-    // if (loginExitoso != 0) {
-    //     if (UsuariosModel.findById(idUsuario) != null || UsuariosModel.findById(idUsuario) != undefined) {
-    //         if (loginExitoso.id == idUsuario) {
-    //             let result = await UsuariosModel.findByIdAndUpdate(idUsuario, usuario);
-    //             return result;
-    //         } else {
-    //             console.log("¡ERROR! El usuario no puede ser modificado porque no le pertenece");
-    //         }
-    //     } else {
-    //         console.log("¡ERROR! El usuario no existe");
-    //     }
-    // } else {
-    //     console.log("¡Atencion! Se requiere inicio de sesion correcto para esta operacion");
-    // }
 }
 
 module.exports.deleteUsuario = async function (sesion, idUsuario) {
@@ -199,7 +159,7 @@ module.exports.saveFriend = async function (friend) {
             let result = usr.updateOne({ $push: { "amigos": { 'amigo': friendid } } });
             return result;
         } else {
-            console.log("Post no encontrado");
+            console.log("Usuario no encontrado");
         }
     } catch (error) {
         return error;
@@ -212,7 +172,6 @@ module.exports.getNoAgregados = async function (usrid) {
         const usuarios = await UsuariosModel.find();
         let noagregados = [];
         if ((result != null || result != undefined) && result.amigos.length != 0) {
-            
             if (usuarios != null || usuarios != undefined) {
                 for (let a of usuarios) {
                     let c = 0;
@@ -231,14 +190,4 @@ module.exports.getNoAgregados = async function (usrid) {
     } catch (error) {
         return error;
     }
-
-    // const email = sesion.email;
-    // const password = sesion.password;
-    // const loginExitoso = await this.loginUser(email, password);
-    // if (loginExitoso != 0) {
-    //     const result = await UsuariosModel.find();
-    //     return result;
-    // } else {
-    //     console.log("¡Atencion! Se requiere inicio de sesion correcto para esta operacion");
-    // }
 }
