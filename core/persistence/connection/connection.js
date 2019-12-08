@@ -7,7 +7,9 @@ var mysql = require("mysql");
 mongoose.connect(config.mongodb.defaultconnection, {
     reconnectTries: Number.MAX_VALUE, // Cuantas veces se va a intentar conectar
     reconnectInterval: 500, // Intervalo de cada intento de coneccion
-    poolSize: 10 // 10 conexiones maximas simultaneas
+    poolSize: 10, // 10 conexiones maximas simultaneas
+    useNewUrlParser: true,
+    useUnifiedTopology: true
 });
 
 mongoose.connection.on("connected", () => {

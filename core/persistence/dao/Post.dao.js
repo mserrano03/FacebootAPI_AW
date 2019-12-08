@@ -1,44 +1,186 @@
 const PostsModel = require("../schemas/Posts.schema");
+const UsuariosModel = require("../schemas/Usuario.schema");
 const login = require("./Usuario.dao");
+const tokens = require("../../../middlewares/tokens");
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 
-module.exports.save = async function (sesion, post) {
-    const email = sesion.email;
-    const password = sesion.password;
-    const logginExitoso = await login.loginUser(email, password);
-    if (logginExitoso != 0) {
+module.exports.save = async function (post) {
+    try {
         const newPostSchema = new PostsModel(post);
         const result = await newPostSchema.save();
-        return result;
-    } else {
-        console.log("¡Error! No se pudo guardar el post");
+        if (result == null || result == undefined) {
+            return 0;
+        } else {
+            let autor = await UsuariosModel.findOne(result._idAutor);
+            let fecha = `${result.createdAt.getDate()}/${result.createdAt.getMonth() + 1}/${result.createdAt.getFullYear()}`;
+            let hora = `${result.createdAt.getHours()}:${result.createdAt.getMinutes()}`;
+            let post = {
+                id: result._id,
+                idAutor: result._idAutor,
+                autor: autor.nombre,
+                autorimg: autor.uriImage,
+                texto: result.texto,
+                tags: result.tags,
+                uriImage: result.uriImage,
+                comentarios: result.comentarios,
+                publico: result.publico,
+                fecha: fecha,
+                hora: hora
+            }
+            return post;
+        }
+
+    } catch (error) {
+        return error;
     }
 }
 
-module.exports.getPosts = async function (sesion) {
-    const email = sesion.email;
-    const password = sesion.password;
-    let logginExitoso = await login.loginUser(email, password);
-    if (logginExitoso != 0) {
-        const result = await PostsModel.find();
-        return result;
-    } else {
-        const result = await PostsModel.find({ "tipoPost": "Publico" });
-        return result;
+module.exports.getPosts = async function (usrid) {
+    try {
+        const result = await PostsModel.find().sort({
+            'createdAt': 'desc'
+        });
+        let posts = [];
+        if (result == null || result == undefined) {
+            return 0;
+        } else {
+            for (p of result) {
+                let autor = await UsuariosModel.findOne(p._idAutor);
+                let fecha = `${p.createdAt.getDate()}/${p.createdAt.getMonth() + 1}/${p.createdAt.getFullYear()}`;
+                let hora = `${p.createdAt.getHours()}:${p.createdAt.getMinutes()}`;
+                let comentarios = [];
+                if (p.comentarios.length != 0) {
+                    for (c of p.comentarios) {
+                        let autorCom = await UsuariosModel.findOne(c._idAutorCom);
+                        let comentario = {
+                            id: c._id,
+                            idAutor: c._idAutorCom,
+                            nombreAutor: autorCom.nombre,
+                            autorimg: autorCom.uriImage,
+                            mensaje: c.mensaje
+                        }
+                        comentarios.push(comentario);
+                    }
+                }
+
+                let post = {
+                    id: p._id,
+                    idAutor: p._idAutor,
+                    autor: autor.nombre,
+                    texto: p.texto,
+                    tags: p.tags,
+                    uriImage: p.uriImage,
+                    comentarios: comentarios,
+                    fecha: fecha,
+                    hora: hora,
+                    publico: p.publico,
+                    autorimg: autor.uriImage
+                }
+                posts.push(post);
+            }
+            return posts;
+        }
+    } catch (error) {
+        return error;
     }
 }
 
-module.exports.getPostById = async function (sesion, idPost) {
-    const email = sesion.email;
-    const password = sesion.password;
-    let logginExitoso = await login.loginUser(email, password);
-    const result = await PostsModel.findById(idPost);
-    if (logginExitoso != 0) {
-        return result;
-    } else if ((logginExitoso == 0) && result.tipoPost == "Publico") {
-        return result;
-    } else {
-        console.log("El post buscado es privado, necesitas Iniciar sesion para poder verlo");
+module.exports.getPostById = async function (idPost) {
+    try {
+        const result = await PostsModel.findById(idPost);
+        if (result == null || result == undefined) {
+            return 0;
+        } else {
+            let autor = await UsuariosModel.findOne(result._idAutor);
+            let fecha = `${result.createdAt.getDate()}/${result.createdAt.getMonth() + 1}/${result.createdAt.getFullYear()}`;
+            let hora = `${result.createdAt.getHours()}:${result.createdAt.getMinutes()}`;
+            let comentarios = [];
+            if (result.comentarios.length != 0) {
+                for (c of result.comentarios) {
+                    let autorCom = await UsuariosModel.findOne(c._idAutorCom);
+                    let comentario = {
+                        id: c._id,
+                        idAutor: c._idAutorCom,
+                        nombreAutor: autorCom.nombre,
+                        autorimg: autorCom.uriImage,
+                        mensaje: c.mensaje
+                    }
+                    comentarios.push(comentario);
+                }
+            }
+            let post = {
+                id: result._id,
+                idAutor: result._idAutor,
+                autor: autor.nombre,
+                texto: result.texto,
+                tags: result.tags,
+                uriImage: result.uriImage,
+                comentarios: result.comentarios,
+                publico: result.publico,
+                fecha: fecha,
+                hora: hora,
+                autorimg: autor.uriImage,
+                comentarios: comentarios
+            }
+            return post;
+        }
+    } catch (error) {
+        return error;
     }
+}
+
+module.exports.getPostsUsr = async function (usrid) {
+    try {
+        const result = await PostsModel.find({ "_idAutor": usrid }).sort({
+            'createdAt': 'desc'
+        });
+        let posts = [];
+        if (result == null || result == undefined) {
+            return 0;
+        } else {
+            for (p of result) {
+                let autor = await UsuariosModel.findOne(p._idAutor);
+                let fecha = `${p.createdAt.getDate()}/${p.createdAt.getMonth() + 1}/${p.createdAt.getFullYear()}`;
+                let hora = `${p.createdAt.getHours()}:${p.createdAt.getMinutes()}`;
+                let comentarios = [];
+                if (p.comentarios.length != 0) {
+                    for (c of p.comentarios) {
+                        let autorCom = await UsuariosModel.findOne(c._idAutorCom);
+                        let comentario = {
+                            id: c._id,
+                            idAutor: c._idAutorCom,
+                            nombreAutor: autorCom.nombre,
+                            mensaje: c.mensaje,
+                            autorimg: autorCom.uriImage
+                        }
+                        comentarios.push(comentario);
+                    }
+                }
+
+                let post = {
+                    id: p._id,
+                    idAutor: p._idAutor,
+                    autor: autor.nombre,
+                    texto: p.texto,
+                    tags: p.tags,
+                    uriImage: p.uriImage,
+                    comentarios: comentarios,
+                    fecha: fecha,
+                    hora: hora,
+                    publico: p.publico,
+                    autorimg: autor.uriImage
+                }
+                posts.push(post);
+            }
+            return posts;
+        }
+    } catch (error) {
+        return 0;
+    }
+
+
+
 }
 
 module.exports.updatePost = async function (sesion, idPost, post) {
@@ -58,37 +200,28 @@ module.exports.updatePost = async function (sesion, idPost, post) {
     }
 }
 
-module.exports.deletePost = async function (sesion, idPost) {
-    const email = sesion.email;
-    const password = sesion.password;
-    let logginExitoso = await login.loginUser(email, password);
-    if (logginExitoso != 0) {
-        let autorDelPost = await PostsModel.findById(idPost);
-        if (autorDelPost._idAutor == logginExitoso.id) {
-            let result = await PostsModel.findByIdAndDelete(idPost);
-            return result;
-        } else {
-            console.log("Error, no eres el autor del post >:c ");
-        }
-    } else {
-        console.log("¡Error! Necesitas iniciar sesion para esta operacion");
+module.exports.deletePost = async function (idPost) {
+    try {
+        let result = await PostsModel.findByIdAndDelete(idPost);
+        return result;
+    } catch (error) {
+        return error;
     }
 }
 
-module.exports.saveComment = async function (sesion, idPost, comment) {
-    const email = sesion.email;
-    const password = sesion.password;
-    let logginExitoso = await login.loginUser(email, password);
-    if (logginExitoso != 0) {
-        let post = await PostsModel.findById(idPost);
+module.exports.saveComment = async function (comment) {
+    try {
+        const idpost = comment.idpost;
+        const comentario = comment.comentario;
+        let post = await PostsModel.findById(idpost);
         if (post != null || post != undefined) {
-            let result = post.updateOne({ $push: { "comentarios": comment } });
+            let result = post.updateOne({ $push: { "comentarios": comentario } });
             return result;
         } else {
             console.log("Post no encontrado");
         }
-    } else {
-        console.log("¡Error! Necesitas iniciar sesion para esta operacion");
+    } catch (error) {
+        return error;
     }
 }
 
@@ -114,37 +247,23 @@ module.exports.updateComment = async function (sesion, idComment, comment) {
     }
 }
 
-module.exports.deleteComment = async function (sesion, idPost, idComment) {
-    const email = sesion.email;
-    const password = sesion.password;
-    let logginExitoso = await login.loginUser(email, password);
-    if (logginExitoso != 0) {
-        let comentario = await PostsModel.find({ "comentarios._id": idComment }, { "comentarios.$": 1 });
-        if (comentario != null || comentario != undefined) {
-            let autorComment = comentario[0].comentarios[0]._idAutorCom;
-            if (logginExitoso.id == autorComment) {
-                let result = PostsModel.update({ "_id": idPost }, { $pull: { "comentarios": { "_id": idComment } } });
-                return result;
-            } else {
-                console.log("No entro");
-            }
-        } else {
-            console.log("Post no encontrado");
-        }
+module.exports.deleteComment = async function (idPost, idComment) {
+    let comentario = await PostsModel.find({ "comentarios._id": idComment }, { "comentarios.$": 1 });
+    if (comentario != null || comentario != undefined) {
+        let result = PostsModel.update({ "_id": idPost }, { $pull: { "comentarios": { "_id": idComment } } });
+        return result;
     } else {
-        console.log("¡Error! Necesitas iniciar sesion para esta operacion");
+        console.log("Post no encontrado");
     }
 }
 
-module.exports.searchPosts = async function (sesion) {
-    const email = sesion.email;
-    const password = sesion.password;
-    const palabra = sesion.palabra;
-    let logginExitoso = await login.loginUser(email, password);
-    if (logginExitoso != 0) {
-        let result = await PostsModel.find({ $or: [{ "tags": palabra }] });
+module.exports.searchPosts = async function (palabra) {
+    const palabraBuscada = palabra.palabra;
+
+    let result = await PostsModel.find({ $or: [{ "texto": new RegExp(palabraBuscada) }, { "comentarios.mensaje": new RegExp(palabraBuscada) }] });
+    if (result != null || result != undefined) {
         return result;
     } else {
-        console.log("¡Error! Necesitas iniciar sesion para esta operacion");
+        return 0;
     }
 }

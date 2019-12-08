@@ -10,7 +10,8 @@ const usuarioSchema = new Schema({
     nombre: { type: String, required: true, maxlength: 50 },
     edad: { type: Number, required: true, min: 15, max: 100 },
     sexo: { type: String, required: true },
-    fecha_nacimiento: { type: Date, required: true },
+    fecha_nacimiento: { type: String, required: true },
+    uriImage: { type: String, required: false ,default:'https://i.pinimg.com/originals/69/83/2b/69832b335b2793475ba3b64c0ade7768.jpg'},
     gen_musicales: [{ type: String, required: true, enum: GenMusicales.getAll() }],
     gen_peliculas: [{ type: String, required: true, enum: GenPeliculas.getAll() }],
     amigos: {

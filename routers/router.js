@@ -4,32 +4,63 @@ const UsuariosController = require("../core/controllers/Usuario.controller");
 const PostController = require("../core/controllers/Posts.controller");
 const middlewares = require("../middlewares/middlewares");
 
-// Cada que se solicite peticion a estas rutas se pedira JWT
-router.use("/post", middlewares.tokenMiddleware);
-router.use("/usuario", middlewares.tokenMiddleware);
-router.use("/search", middlewares.tokenMiddleware);
 
 // Ruta para Login
-router.get("/loginUser", UsuariosController.login);
+router.post("/loginUser", UsuariosController.login);
 
 // Rutas para usuarios
-router.get("/usuario", UsuariosController.getUsuarios); // Obtener usuarios
-router.get("/usuario/:idUsuario", UsuariosController.getUsuariosById); // Obtener usuario por ID
-router.put("/usuario/:idUsuario", UsuariosController.putUsuario); // Editar usuario
+router.get("/usuario", middlewares.tokenMiddleware, UsuariosController.getUsuarios); // Obtener usuarios
+router.get("/usuario/:idUsuario", UsuariosController.getUsuariosById, middlewares.tokenMiddleware); // Obtener usuario por ID
+router.put("/usuario/:idUsuario", middlewares.tokenMiddleware, UsuariosController.putUsuario); // Editar usuario
 router.post("/usuarios", UsuariosController.saveUsuarios); // Agregar usuario
-router.delete("/usuario/:idUsuario", UsuariosController.deleteUsuario); // Eliminar usuario
-
+router.delete("/usuario/:idUsuario", middlewares.tokenMiddleware, UsuariosController.deleteUsuario); // Eliminar usuario
+router.post("/addfriend",middlewares.tokenMiddleware,UsuariosController.saveFriend);
+router.get("/getnoagregados/:idUsuario",middlewares.tokenMiddleware,UsuariosController.getNoAgregados)
 // Rutas para posts
-router.get("/post", PostController.getPosts); // Obtener publicaciones
-router.get("/post/:idPost", PostController.getPostsById); // Obtener publicacion por ID
-router.put("/post/:idPost", PostController.putPost); // Editar publicacion
-router.post("/post", PostController.savePost); // Agregar publicacion
-router.delete("/post/:idPost", PostController.deletePost); // Eliminar publicacion
+router.get("/post", middlewares.tokenMiddleware, PostController.getPosts); // Obtener publicaciones
+router.get("/post/:idPost", PostController.getPostsById, middlewares.tokenMiddleware); // Obtener publicacion por ID
+router.get("/post/:idUsuario/:idPost", middlewares.tokenMiddleware, PostController.getPostsById); // Obtener publicacion por ID de un usuario
+router.get("/posts/:idUsuario", middlewares.tokenMiddleware, PostController.getPostsUsr); // Obtener publicaciones de un usuario
+router.put("/post/:idPost", middlewares.tokenMiddleware, PostController.putPost); // Editar publicacion
+router.post("/post", middlewares.tokenMiddleware, PostController.savePost); // Agregar publicacion
+router.delete("/post/:idPost", middlewares.tokenMiddleware, PostController.deletePost); // Eliminar publicacion
 
-router.post("/post/:idPost", PostController.saveComment); // Agregar comentarios
-router.put("/post/comment/:idComment", PostController.putComment); // Editar comentario
-router.delete("/post/:idPost/:idComment", PostController.deleteComment); // Eliminar comentario
+router.post("/post/:idPost", middlewares.tokenMiddleware, PostController.saveComment); // Agregar comentarios
+router.put("/post/comment/:idComment", middlewares.tokenMiddleware, PostController.putComment); // Editar comentario
+router.delete("/post/:idPost/:idComment", middlewares.tokenMiddleware, PostController.deleteComment); // Eliminar comentario
 
-router.get("/search", PostController.searchPosts); // Buscar publicacion
+router.get("/search", middlewares.tokenMiddleware, PostController.searchPosts); // Buscar publicacion
+router.post("/upload/profileImage", (req, res) => {
+    if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(400).send('No hay archivo');
+    }
+    let sampleFile = req.body.sampleFile;
+    res.send(req);
+    // let name = Math.random().toString(36).substr(2, 9);
 
+    // sampleFile.mv(`./core/assets/profileImages/${name}.jpg`, function (err) {
+    //     if (err) { return res.status(500).send(err); }
+    //     res.send('File uploaded!');
+    // });
+});
+router.post("/upload/post", (req, res) => {
+    if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(400).send('No hay archivo');
+    }
+    let sampleFile = req.files.sampleFile;
+    let name = Math.random().toString(36).substr(2, 9);
+
+    sampleFile.mv(`./core/assets/posts/${name}.jpg`, function (err) {
+        if (err) { return res.status(500).send(err); }
+        res.send('File uploaded!');
+    });
+});
+router.get("/images/profile/:nombreimg", (req, res) => {
+    const nombreimg = req.params.nombreimg;
+    res.sendFile(process.cwd()+`/core/assets/profileImages/${nombreimg}`);
+});
+router.get("/images/post/:nombreimg", (req, res) => {
+    const nombreimg = req.params.nombreimg;
+    res.sendFile(process.cwd()+`/core/assets/posts/${nombreimg}`);
+});
 module.exports = router;

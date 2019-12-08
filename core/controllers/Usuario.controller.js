@@ -5,19 +5,17 @@ const tokensMiddleware = require("../../middlewares/tokens");
 
 module.exports = {
     login(req, res) {
-        const email = req.headers.email;
-        const password = req.headers.password;
+        const usuario = req.body;
         const operacion = "Login";
-        UsuariosDao.loginUser(email, password).then((result) => {
-            res.status(201).json("¡Exito! Se ha iniciado sesion correctamente");
-            InfoDao.save(result, operacion);
-            logger.info(result);
-
-            const token = tokensMiddleware.generateToken({
-                _id: password,
-                nombre: email
-            });
-            console.log(`[TOKEN GENERADO]: \n Escriba el siguiente token en la cabecera(Headers) de Postman con el nombre de: [x-access-token] para iniciar sesion: \n ----->` + token);
+        UsuariosDao.loginUser(usuario).then((result) => {
+            if (result === 0) {
+                res.status(404).json("¡Ha ocurrido un problema, porfavor verifique los datos y vuelva a intentarlo");
+                logger.info(err);
+            } else {
+                res.status(200).json(result);
+                InfoDao.save(result, operacion);
+                logger.info(result);
+            }
         }).catch(err => {
             res.status(500).json("¡Ha ocurrido un problema, porfavor verifique los datos y vuelva a intentarlo");
             logger.info(err);
@@ -37,12 +35,12 @@ module.exports = {
         });
     },
     getUsuarios(req, res) {
-        const sesion = req.headers;
+        //const sesion = req.headers;
         const operacion = "Buscar usuarios";
 
         try {
-            UsuariosDao.getUsuarios(sesion).then((result) => {
-                res.status(200).json(result);
+            UsuariosDao.getUsuarios().then((result) => {
+                res.status(200).json({ usuarios: result });
                 InfoDao.save(result, operacion);
                 logger.info(result);
             }).catch((error) => {
@@ -56,11 +54,10 @@ module.exports = {
     },
     getUsuariosById(req, res) {
         let idUsuario = req.params.idUsuario;
-        const sesion = req.headers;
         const operacion = "Buscar usuario por ID";
 
         try {
-            UsuariosDao.getUsuariosById(sesion, idUsuario).then((result) => {
+            UsuariosDao.getUsuariosById(idUsuario).then((result) => {
                 res.status(200).json(result);
                 InfoDao.save(result, operacion);
                 logger.info(result);
@@ -75,13 +72,11 @@ module.exports = {
     },
     putUsuario(req, res) {
         let usuario = req.body;
-        let idUsuario = req.params.idUsuario;
-        const sesion = req.headers;
         const operacion = "Editar usuario";
 
         try {
-            UsuariosDao.updateUsuario(sesion, idUsuario, usuario).then((result) => {
-                res.status(200).json("¡Exito! Se ha editado el usuario satisfactoriamente");
+            UsuariosDao.updateUsuario(usuario).then((result) => {
+                res.status(200).json(result);
                 InfoDao.save(result, operacion);
                 logger.info(result);
             }).catch((error) => {
@@ -112,5 +107,29 @@ module.exports = {
             res.status(500).json("¡Ha ocurrido un problema, porfavor verifique los datos y vuelva a intentarlo");
             logger.info(error);
         }
+    },
+    saveFriend(req, response) {
+        const friend = req.body;
+        const operacion = "Guardar comentario";
+
+        UsuariosDao.saveFriend(friend).then((result) => {
+            response.status(201).json(result);
+            InfoDao.save(result, operacion);
+            logger.info(result);
+        }).catch(err => {
+            response.status(500).json("¡Ha ocurrido un problema, porfavor verifique los datos y vuelva a intentarlo");
+            logger.info(err);
+        });
+    },
+    getNoAgregados(req, response) {
+        const usr = req.params.idUsuario;
+        UsuariosDao.getNoAgregados(usr).then((result) => {
+            response.status(201).json(result);
+            InfoDao.save(result, operacion);
+            logger.info(result);
+        }).catch(err => {
+            response.status(500).json("¡Ha ocurrido un problema, porfavor verifique los datos y vuelva a intentarlo");
+            logger.info(err);
+        });
     }
 }
