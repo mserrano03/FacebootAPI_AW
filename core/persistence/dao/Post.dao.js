@@ -258,12 +258,23 @@ module.exports.deleteComment = async function (idPost, idComment) {
 }
 
 module.exports.searchPosts = async function (palabra) {
-    const palabraBuscada = palabra.palabra;
+    const palabraBuscada = palabra.buscar;
 
-    let result = await PostsModel.find({ $or: [{ "texto": new RegExp(palabraBuscada) }, { "comentarios.mensaje": new RegExp(palabraBuscada) }] });
-    if (result != null || result != undefined) {
+    let result = await PostsModel.find({ "tags": new RegExp(palabraBuscada) });
+    if (result.length > 0) {
         return result;
     } else {
-        return 0;
+        let resultAgain = await UsuariosModel.find({ "nombre": new RegExp(palabraBuscada) });
+        if (resultAgain.length > 0) {
+            let idAutor = resultAgain[0].id;
+            let resultAgainx2 = await PostsModel.find({ $or: [{ "_idAutor": idAutor }, { "comentarios._idAutorCom": idAutor }] });
+            if (resultAgainx2.length > 0) {
+                return resultAgainx2;
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
     }
 }
