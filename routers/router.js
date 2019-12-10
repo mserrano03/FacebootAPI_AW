@@ -29,7 +29,7 @@ router.post("/post/:idPost", middlewares.tokenMiddleware, PostController.saveCom
 router.put("/post/comment/:idComment", middlewares.tokenMiddleware, PostController.putComment); // Editar comentario
 router.delete("/post/:idPost/:idComment", middlewares.tokenMiddleware, PostController.deleteComment); // Eliminar comentario
 
-router.get("/search", middlewares.tokenMiddleware, PostController.searchPosts); // Buscar publicacion
+router.get("/search/:palabra", middlewares.tokenMiddleware, PostController.searchPosts); // Buscar publicacion
 router.post("/upload/profileImage", (req, res) => {
     if (!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send('No hay archivo');

@@ -257,6 +257,7 @@ module.exports.deleteComment = async function (idPost, idComment) {
     }
 }
 
+<<<<<<< Updated upstream
 module.exports.searchPosts = async function (sesion) {
     const email = sesion.email;
     const password = sesion.password;
@@ -267,5 +268,61 @@ module.exports.searchPosts = async function (sesion) {
         return result;
     } else {
         console.log("¡Error! Necesitas iniciar sesion para esta operacion");
+=======
+module.exports.searchPosts = async function (palabra) {
+    const palabraBuscada = palabra;
+    let posts = [];
+
+    let result = await PostsModel.find({ "tags": new RegExp(palabraBuscada) });
+    if (result.length < 0) {
+        return result;
+    } else {
+        let resultAgain = await UsuariosModel.find({ "nombre": new RegExp(palabraBuscada) });
+        if (resultAgain.length > 0) {
+            let idAutor = resultAgain[0].id;
+            let resultAgainx2 = await PostsModel.find({ $or: [{ "_idAutor": idAutor }, { "comentarios._idAutorCom": idAutor }] });
+            if (resultAgainx2.length > 0) {
+                for (p of resultAgainx2) {
+                    let autor = await UsuariosModel.findOne(p._idAutor);
+                    let fecha = `${p.createdAt.getDate()}/${p.createdAt.getMonth() + 1}/${p.createdAt.getFullYear()}`;
+                    let hora = `${p.createdAt.getHours()}:${p.createdAt.getMinutes()}`;
+                    let comentarios = [];
+                    if (p.comentarios.length != 0) {
+                        for (c of p.comentarios) {
+                            let autorCom = await UsuariosModel.findOne(c._idAutorCom);
+                            let comentario = {
+                                id: c._id,
+                                idAutor: c._idAutorCom,
+                                nombreAutor: autorCom.nombre,
+                                autorimg: autorCom.uriImage,
+                                mensaje: c.mensaje
+                            }
+                            comentarios.push(comentario);
+                        }
+                    }
+
+                    let post = {
+                        id: p._id,
+                        idAutor: p._idAutor,
+                        autor: autor.nombre,
+                        texto: p.texto,
+                        tags: p.tags,
+                        uriImage: p.uriImage,
+                        comentarios: comentarios,
+                        fecha: fecha,
+                        hora: hora,
+                        publico: p.publico,
+                        autorimg: autor.uriImage
+                    }
+                    posts.push(post);
+                }
+                return posts;
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+>>>>>>> Stashed changes
     }
 }

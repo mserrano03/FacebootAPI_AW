@@ -159,7 +159,11 @@ module.exports = {
         }
     },
     searchPosts(req, res) {
+<<<<<<< Updated upstream
         const sesion = req.headers;
+=======
+        const palabra = req.params.palabra;
+>>>>>>> Stashed changes
         const operacion = "Buscar por filtro";
 
         try {
